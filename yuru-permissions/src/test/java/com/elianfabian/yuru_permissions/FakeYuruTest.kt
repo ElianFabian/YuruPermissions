@@ -171,7 +171,7 @@ class FakeYuruTest {
 	@Test
 	fun `test pre-emptive action resolves immediate request`() = runTest(testDispatcher) {
 		val mockYuru = Yuru.createSimulatedYuruEnvironment()
-		val controller = mockYuru.getOrCreateSinglePermissionController("CAMERA")
+		val controller = mockYuru.getOrCreateSinglePermissionController(Manifest.permission.CAMERA)
 
 		// 1. Accept BEFORE request (thanks to Result Queuing)
 		controller.accept()

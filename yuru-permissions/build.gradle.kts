@@ -4,7 +4,7 @@ plugins {
 
 android {
 	namespace = "com.elianfabian.yuru_permissions"
-	compileSdk = 35
+	compileSdk = 37
 
 	defaultConfig {
 		minSdk = 21
@@ -27,6 +27,8 @@ dependencies {
 	implementation(libs.kotlinxCoroutinesAndroid)
 	testImplementation(libs.junit)
 	testImplementation(libs.kotlinxCoroutinesTest)
+	androidTestImplementation(libs.kotlinxCoroutinesTest)
+	androidTestImplementation(libs.androidx.uiautomator)
 	androidTestImplementation(libs.androidx.espresso.core)
 	androidTestImplementation(libs.androidx.junit)
 }

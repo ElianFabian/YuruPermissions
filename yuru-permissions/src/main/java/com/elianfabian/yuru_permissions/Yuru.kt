@@ -21,7 +21,7 @@ import kotlinx.coroutines.SupervisorJob
 public open class Yuru internal constructor(
 	internal val backend: YuruBackend,
 ) {
-	private val _scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+	private val _scope = CoroutineScope(Dispatchers.Main.immediate)
 
 	private val _singlePermissionControllers = mutableMapOf<String, YuruPermissionControllerImpl>()
 	private val _multiplePermissionControllers = mutableMapOf<List<String>, YuruMultiplePermissionControllerImpl>()

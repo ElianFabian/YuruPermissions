@@ -21,11 +21,13 @@ internal class RealYuruBackend : YuruBackend {
 	private val _singleLaunchers = mutableMapOf<String, ActivityResultLauncherHolder<String>>()
 	private val _multipleLaunchers = mutableMapOf<List<String>, ActivityResultLauncherHolder<Array<String>>>()
 
+	private val _keyByController = mutableMapOf<Any, String>()
+
 	private val _singleContinuations = mutableMapOf<String, CancellableContinuation<YuruPermissionState>>()
 	private val _multipleContinuations = mutableMapOf<List<String>, CancellableContinuation<Map<String, YuruPermissionState>>>()
 
 	override fun getPermissionState(permissionName: String): YuruPermissionState {
-		return com.elianfabian.yuru_permissions.internal.getPermissionState(
+		return getPermissionState(
 			activity = ActivityProvider.getActivityOrNull() ?: return YuruPermissionState.NotDetermined,
 			permissionName = permissionName,
 		)
@@ -34,7 +36,7 @@ internal class RealYuruBackend : YuruBackend {
 	override fun getMultiplePermissionState(permissionNames: List<String>): Map<String, YuruPermissionState> {
 		val activity = ActivityProvider.getActivityOrNull() ?: return permissionNames.associateWith { YuruPermissionState.NotDetermined }
 		return permissionNames.associateWith { name ->
-			com.elianfabian.yuru_permissions.internal.getPermissionState(
+			getPermissionState(
 				activity = activity,
 				permissionName = name,
 			)
@@ -43,7 +45,7 @@ internal class RealYuruBackend : YuruBackend {
 
 	override suspend fun requestPermission(permissionName: String): YuruPermissionState {
 		val holder = _singleLaunchers[permissionName] ?: error("Launcher not initialized for $permissionName")
-		
+
 		return suspendCancellableCoroutine { continuation ->
 			_singleContinuations[permissionName] = continuation
 			continuation.invokeOnCancellation { _singleContinuations.remove(permissionName) }
@@ -77,12 +79,13 @@ internal class RealYuruBackend : YuruBackend {
 		scope: CoroutineScope,
 		observer: DefaultLifecycleObserver,
 		singleControllers: Map<String, YuruPermissionControllerImpl>,
-		multipleControllers: Map<List<String>, YuruMultiplePermissionControllerImpl>
+		multipleControllers: Map<List<String>, YuruMultiplePermissionControllerImpl>,
 	) {
-		ProcessLifecycleOwner.get().lifecycle.addObserver(observer)
-
 		scope.launch {
+			ProcessLifecycleOwner.get().lifecycle.addObserver(observer)
+
 			ActivityProvider.activity.collect { activity ->
+				println("$$$ activity: $activity")
 				singleControllers.forEach { (_, controller) ->
 					refreshLauncher(activity, controller)
 				}
@@ -94,19 +97,25 @@ internal class RealYuruBackend : YuruBackend {
 	}
 
 	override fun validatePermission(permissionName: String) {
-		require(com.elianfabian.yuru_permissions.internal.isValidSystemPermission(permissionName)) {
+		require(isValidSystemPermission(permissionName)) {
 			"$permissionName is not a valid system permission"
 		}
+
+		checkManifestPermission(permissionName)
 	}
 
 	private fun refreshLauncher(activity: ComponentActivity?, controller: YuruPermissionControllerImpl) {
 		val holder = _singleLaunchers.getOrPut(controller.permissionName) { ActivityResultLauncherHolder() }
-		holder.unregister()
+		holder.launcher?.also { launcher ->
+			launcher.unregister()
+		}
 
-		if (activity == null) return
+		if (activity == null) {
+			return
+		}
 
 		holder.launcher = activity.activityResultRegistry.register(
-			key = UUID.randomUUID().toString(),
+			key = _keyByController.getOrPut(controller) { UUID.randomUUID().toString() },
 			contract = ActivityResultContracts.RequestPermission(),
 			callback = {
 				val result = getPermissionState(controller.permissionName)
@@ -118,12 +127,16 @@ internal class RealYuruBackend : YuruBackend {
 
 	private fun refreshLauncher(activity: ComponentActivity?, controller: YuruMultiplePermissionControllerImpl) {
 		val holder = _multipleLaunchers.getOrPut(controller.permissionNames) { ActivityResultLauncherHolder() }
-		holder.unregister()
+		holder.launcher?.also { launcher ->
+			launcher.unregister()
+		}
 
-		if (activity == null) return
+		if (activity == null) {
+			return
+		}
 
 		holder.launcher = activity.activityResultRegistry.register(
-			key = UUID.randomUUID().toString(),
+			key = _keyByController.getOrPut(controller) { UUID.randomUUID().toString() },
 			contract = ActivityResultContracts.RequestMultiplePermissions(),
 			callback = {
 				val result = getMultiplePermissionState(controller.permissionNames)

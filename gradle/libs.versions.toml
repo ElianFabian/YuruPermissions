@@ -12,6 +12,7 @@ appcompat = "1.7.1"
 material = "1.14.0"
 kotlinCoroutines = "1.8.1"
 kotlinxCoroutinesTest = "1.8.1"
+uiautomator = "2.3.0"
 lifecycleProcess = "2.9.2"
 activityKtx = "1.13.0"
 
@@ -37,6 +38,7 @@ material = { group = "com.google.android.material", name = "material", version.r
 kotlinxCoroutinesAndroid = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinCoroutines" }
 kotlinxCoroutinesTest = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 androidx-lifecycleProcess = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleProcess" }
+androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 
 
 activityProvider = {group = "com.github.ElianFabian", name = "ActivityProvider", version.ref = "activityProvider"}
