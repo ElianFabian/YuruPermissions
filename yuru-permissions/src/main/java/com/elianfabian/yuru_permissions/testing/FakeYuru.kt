@@ -1,7 +1,7 @@
 package com.elianfabian.yuru_permissions.testing
 
+import com.elianfabian.yuru_permissions.BaseYuruImpl
 import com.elianfabian.yuru_permissions.Yuru
-import com.elianfabian.yuru_permissions.YuruImpl
 import com.elianfabian.yuru_permissions.YuruMultiplePermissionController
 import com.elianfabian.yuru_permissions.YuruPermissionController
 import com.elianfabian.yuru_permissions.YuruPermissionState
@@ -16,7 +16,7 @@ import com.elianfabian.yuru_permissions.internal.FakeYuruBackend
  */
 public class FakeYuru internal constructor(
 	private val fakeBackend: FakeYuruBackend = FakeYuruBackend(),
-) : YuruImpl(fakeBackend) {
+) : BaseYuruImpl(fakeBackend) {
 
 	/**
 	 * Resets all simulated permissions to [YuruPermissionState.NotDetermined].
@@ -25,12 +25,12 @@ public class FakeYuru internal constructor(
 		fakeBackend.clearStorage()
 	}
 
-	override fun getOrCreateSinglePermissionController(permissionName: String): FakeYuruPermissionController {
-		return super.getOrCreateSinglePermissionController(permissionName) as FakeYuruPermissionController
+	override fun singlePermissionController(permission: String): FakeYuruPermissionController {
+		return super.singlePermissionController(permission) as FakeYuruPermissionController
 	}
 
-	override fun getOrCreateMultiplePermissionController(permissionNames: List<String>): FakeYuruMultiplePermissionController {
-		return super.getOrCreateMultiplePermissionController(permissionNames) as FakeYuruMultiplePermissionController
+	override fun multiplePermissionController(permissions: List<String>): FakeYuruMultiplePermissionController {
+		return super.multiplePermissionController(permissions) as FakeYuruMultiplePermissionController
 	}
 }
 
@@ -40,8 +40,10 @@ public class FakeYuru internal constructor(
 public interface FakeYuruPermissionController : YuruPermissionController {
 	/** Simulates the user accepting the permission. */
 	public fun accept()
+
 	/** Simulates the user rejecting the permission. */
 	public fun reject()
+
 	/** Directly updates the permission state. */
 	public fun updateState(newState: YuruPermissionState)
 }
@@ -52,8 +54,10 @@ public interface FakeYuruPermissionController : YuruPermissionController {
 public interface FakeYuruMultiplePermissionController : YuruMultiplePermissionController {
 	/** Simulates the user accepting all permissions. */
 	public fun acceptAll()
+
 	/** Simulates the user rejecting all permissions. */
 	public fun rejectAll()
+
 	/** Directly updates multiple permission states. */
 	public fun updateStates(newStates: Map<String, YuruPermissionState>)
 }

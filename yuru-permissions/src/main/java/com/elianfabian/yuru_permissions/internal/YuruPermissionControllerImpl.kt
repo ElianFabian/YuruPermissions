@@ -25,7 +25,7 @@ internal open class YuruPermissionControllerImpl(
 		if (state.value == YuruPermissionState.Granted) {
 			return YuruPermissionState.Granted
 		}
-		
+
 		val result = backend.requestPermission(permissionName)
 		_state.value = result
 		return result

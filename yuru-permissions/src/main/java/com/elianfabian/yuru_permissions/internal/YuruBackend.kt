@@ -10,7 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 internal interface YuruBackend {
 	fun getPermissionState(permissionName: String): YuruPermissionState
 	fun getMultiplePermissionState(permissionNames: List<String>): Map<String, YuruPermissionState>
-	
+
 	suspend fun requestPermission(permissionName: String): YuruPermissionState
 	suspend fun requestMultiplePermissions(permissionNames: List<String>): Map<String, YuruPermissionState>
 
@@ -21,7 +21,7 @@ internal interface YuruBackend {
 		scope: CoroutineScope,
 		observer: DefaultLifecycleObserver,
 		singleControllers: Map<String, YuruPermissionControllerImpl>,
-		multipleControllers: Map<List<String>, YuruMultiplePermissionControllerImpl>
+		multipleControllers: Map<List<String>, YuruMultiplePermissionControllerImpl>,
 	)
 
 	fun validatePermission(permissionName: String)

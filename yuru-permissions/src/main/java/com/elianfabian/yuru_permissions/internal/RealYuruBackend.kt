@@ -29,7 +29,7 @@ internal class RealYuruBackend : YuruBackend {
 	override fun getPermissionState(permissionName: String): YuruPermissionState {
 		return getPermissionState(
 			activity = ActivityProvider.getActivityOrNull() ?: return YuruPermissionState.NotDetermined,
-			permissionName = permissionName,
+			permission = permissionName,
 		)
 	}
 
@@ -38,7 +38,7 @@ internal class RealYuruBackend : YuruBackend {
 		return permissionNames.associateWith { name ->
 			getPermissionState(
 				activity = activity,
-				permissionName = name,
+				permission = name,
 			)
 		}
 	}

@@ -21,7 +21,7 @@ class YuruApiPre23InstrumentedTest {
 	@Test
 	fun testCameraPermissionGrantedOnPre23() = runTest(timeout = 5.seconds) {
 		val yuru = Yuru
-		val controller = yuru.getOrCreateSinglePermissionController(Manifest.permission.CAMERA)
+		val controller = yuru.singlePermissionController(Manifest.permission.CAMERA)
 
 		// On API < 23, permissions are granted at install time if in manifest.
 		// So it should be Granted immediately.
@@ -37,7 +37,7 @@ class YuruApiPre23InstrumentedTest {
 		// READ_SMS is not in TestActivity's manifest
 
 		try {
-			val controller = yuru.getOrCreateSinglePermissionController(Manifest.permission.READ_SMS)
+			val controller = yuru.singlePermissionController(Manifest.permission.READ_SMS)
 		}
 		catch (e: IllegalArgumentException) {
 			assertEquals(e::class, IllegalArgumentException::class)

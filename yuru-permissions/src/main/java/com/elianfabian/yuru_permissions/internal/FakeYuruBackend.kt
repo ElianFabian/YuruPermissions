@@ -118,7 +118,7 @@ internal class FakeYuruBackend : YuruBackend {
 		updateControllersForPermission(permissionName, finalState)
 	}
 
-	private fun processAndApplyMultiple( newStates: Map<String, YuruPermissionState>) {
+	private fun processAndApplyMultiple(newStates: Map<String, YuruPermissionState>) {
 		val processedStates = newStates.mapValues { (name, state) ->
 			processRejection(name, state)
 		}

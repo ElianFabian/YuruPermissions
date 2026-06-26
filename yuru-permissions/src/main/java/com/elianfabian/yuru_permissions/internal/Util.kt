@@ -15,33 +15,33 @@ import com.elianfabian.yuru_permissions.YuruPermissionState
 @SuppressLint("ObsoleteSdkInt")
 internal fun getPermissionState(
 	activity: Activity,
-	permissionName: String,
+	permission: String,
 ): YuruPermissionState {
 	val sharedPrefs = activity.getSharedPreferences("yuru_permissions_prefs", Context.MODE_PRIVATE)
 
 	return if (ContextCompat.checkSelfPermission(
 			activity,
-			permissionName,
+			permission,
 		) == PackageManager.PERMISSION_GRANTED
 	) {
-		sharedPrefs.edit { remove(permissionName) }
+		sharedPrefs.edit { remove(permission) }
 		YuruPermissionState.Granted
 	}
 	else {
 		if (Build.VERSION.SDK_INT >= 23) {
-			if (activity.shouldShowRequestPermissionRationale(permissionName)) {
-				sharedPrefs.edit { putBoolean(permissionName, true) }
+			if (activity.shouldShowRequestPermissionRationale(permission)) {
+				sharedPrefs.edit { putBoolean(permission, true) }
 				YuruPermissionState.Denied
 			}
 			else {
-				if (sharedPrefs.getBoolean(permissionName, false)) {
+				if (sharedPrefs.getBoolean(permission, false)) {
 					YuruPermissionState.PermanentlyDenied
 				}
 				else YuruPermissionState.NotDetermined
 			}
 		}
 		else {
-			if (sharedPrefs.getBoolean(permissionName, false)) {
+			if (sharedPrefs.getBoolean(permission, false)) {
 				YuruPermissionState.Denied
 			}
 			else YuruPermissionState.NotDetermined
@@ -49,11 +49,11 @@ internal fun getPermissionState(
 	}
 }
 
-internal fun isValidSystemPermission(permissionName: String): Boolean {
+internal fun isValidSystemPermission(permission: String): Boolean {
 	val context = ActivityProvider.getActivityOrNull() ?: return false
 
 	return try {
-		context.packageManager.getPermissionInfo(permissionName, 0)
+		context.packageManager.getPermissionInfo(permission, 0)
 		true
 	}
 	catch (_: PackageManager.NameNotFoundException) {
@@ -61,7 +61,7 @@ internal fun isValidSystemPermission(permissionName: String): Boolean {
 	}
 }
 
-internal fun checkManifestPermission(permissionName: String) {
+internal fun checkManifestPermission(permission: String) {
 	val context = ActivityProvider.getActivityOrNull() ?: return
 
 	val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
@@ -81,10 +81,10 @@ internal fun checkManifestPermission(permissionName: String) {
 			)
 		}
 
-		val isDeclared = packageInfo.requestedPermissions?.contains(permissionName) == true
+		val isDeclared = packageInfo.requestedPermissions?.contains(permission) == true
 
 		if (!isDeclared) {
-			val errorMessage = "The permission '$permissionName' is NOT declared in your AndroidManifest.xml. " +
+			val errorMessage = "The permission '$permission' is NOT declared in your AndroidManifest.xml. " +
 				"The permission request will fail silently without showing the native dialog."
 
 			if (isDebuggable) {

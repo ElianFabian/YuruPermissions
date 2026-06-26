@@ -23,7 +23,7 @@ class FakeYuruTest {
 	@Test
 	fun `test camera permission grant flow`() = runTest(testDispatcher) {
 		val mockYuru = Yuru.createSimulatedYuruEnvironment()
-		val controller = mockYuru.getOrCreateSinglePermissionController(Manifest.permission.CAMERA)
+		val controller = mockYuru.singlePermissionController(Manifest.permission.CAMERA)
 
 		// 1. Initial State
 		assertEquals(YuruPermissionState.NotDetermined, controller.state.value)
@@ -45,7 +45,7 @@ class FakeYuruTest {
 	@Test
 	fun `test clear storage resets all controllers`() = runTest(testDispatcher) {
 		val mockYuru = Yuru.createSimulatedYuruEnvironment()
-		val camera = mockYuru.getOrCreateSinglePermissionController(Manifest.permission.CAMERA)
+		val camera = mockYuru.singlePermissionController(Manifest.permission.CAMERA)
 
 		// Grant camera
 		launch { camera.request() }
@@ -62,7 +62,7 @@ class FakeYuruTest {
 	fun `test multiple permissions reject all`() = runTest(testDispatcher) {
 		val mockYuru = Yuru.createSimulatedYuruEnvironment()
 		val permissions = listOf("p1", "p2")
-		val controller = mockYuru.getOrCreateMultiplePermissionController(permissions)
+		val controller = mockYuru.multiplePermissionController(permissions)
 
 		var results: Map<String, YuruPermissionState>? = null
 		launch {
@@ -78,7 +78,7 @@ class FakeYuruTest {
 	@Test
 	fun `test two rejects change state to permanently denied`() = runTest(testDispatcher) {
 		val mockYuru = Yuru.createSimulatedYuruEnvironment()
-		val camera = mockYuru.getOrCreateSinglePermissionController(Manifest.permission.CAMERA)
+		val camera = mockYuru.singlePermissionController(Manifest.permission.CAMERA)
 
 		// First reject
 		launch { camera.request() }
@@ -94,8 +94,8 @@ class FakeYuruTest {
 	@Test
 	fun `test independent controllers for same permission share state`() = runTest(testDispatcher) {
 		val mockYuru = Yuru.createSimulatedYuruEnvironment()
-		val camera1 = mockYuru.getOrCreateSinglePermissionController(Manifest.permission.CAMERA)
-		val camera2 = mockYuru.getOrCreateSinglePermissionController(Manifest.permission.CAMERA)
+		val camera1 = mockYuru.singlePermissionController(Manifest.permission.CAMERA)
+		val camera2 = mockYuru.singlePermissionController(Manifest.permission.CAMERA)
 
 		assertEquals(YuruPermissionState.NotDetermined, camera1.state.value)
 		assertEquals(YuruPermissionState.NotDetermined, camera2.state.value)
@@ -111,8 +111,8 @@ class FakeYuruTest {
 	@Test
 	fun `test interleaved requests for different permissions`() = runTest(testDispatcher) {
 		val mockYuru = Yuru.createSimulatedYuruEnvironment()
-		val camera = mockYuru.getOrCreateSinglePermissionController("p1")
-		val contacts = mockYuru.getOrCreateSinglePermissionController("p2")
+		val camera = mockYuru.singlePermissionController("p1")
+		val contacts = mockYuru.singlePermissionController("p2")
 
 		var cameraResult: YuruPermissionState? = null
 		var contactsResult: YuruPermissionState? = null
@@ -134,7 +134,7 @@ class FakeYuruTest {
 	fun `test multiple permission controller partial grant`() = runTest(testDispatcher) {
 		val mockYuru = Yuru.createSimulatedYuruEnvironment()
 		val permissions = listOf("p1", "p2")
-		val controller = mockYuru.getOrCreateMultiplePermissionController(permissions)
+		val controller = mockYuru.multiplePermissionController(permissions)
 
 		var results: Map<String, YuruPermissionState>? = null
 		launch { results = controller.request() }
@@ -155,8 +155,8 @@ class FakeYuruTest {
 	@Test
 	fun `test single controller and multiple controller interaction`() = runTest(testDispatcher) {
 		val mockYuru = Yuru.createSimulatedYuruEnvironment()
-		val single = mockYuru.getOrCreateSinglePermissionController("p1")
-		val multiple = mockYuru.getOrCreateMultiplePermissionController(listOf("p1", "p2"))
+		val single = mockYuru.singlePermissionController("p1")
+		val multiple = mockYuru.multiplePermissionController(listOf("p1", "p2"))
 
 		// Grant p1 via multiple controller
 		launch { multiple.request() }
@@ -171,7 +171,7 @@ class FakeYuruTest {
 	@Test
 	fun `test pre-emptive action resolves immediate request`() = runTest(testDispatcher) {
 		val mockYuru = Yuru.createSimulatedYuruEnvironment()
-		val controller = mockYuru.getOrCreateSinglePermissionController(Manifest.permission.CAMERA)
+		val controller = mockYuru.singlePermissionController(Manifest.permission.CAMERA)
 
 		// 1. Accept BEFORE request (thanks to Result Queuing)
 		controller.accept()

@@ -18,46 +18,46 @@ import kotlinx.coroutines.SupervisorJob
  */
 public interface Yuru {
 	/**
-	 * Gets an existing [YuruPermissionController] for the given [permissionName],
+	 * Gets an existing [YuruPermissionController] for the given [permission],
 	 * or creates a new one if it doesn't exist.
 	 */
-	public fun getOrCreateSinglePermissionController(permissionName: String): YuruPermissionController
+	public fun singlePermissionController(permission: String): YuruPermissionController
 
 	/**
 	 * Convenience method to get or create a controller for multiple permissions.
 	 * Requires at least 2 permission names.
 	 */
-	public fun getOrCreateMultiplePermissionController(
-		permissionName0: String,
-		permissionName1: String,
-		vararg permissionName: String,
+	public fun multiplePermissionController(
+		first: String,
+		second: String,
+		vararg remaining: String,
 	): YuruMultiplePermissionController
 
 	/**
-	 * Gets an existing [YuruMultiplePermissionController] for the given [permissionNames],
+	 * Gets an existing [YuruMultiplePermissionController] for the given [permissions],
 	 * or creates a new one if it doesn't exist.
 	 */
-	public fun getOrCreateMultiplePermissionController(
-		permissionNames: List<String>,
+	public fun multiplePermissionController(
+		permissions: List<String>,
 	): YuruMultiplePermissionController
 
 	public companion object : Yuru {
-		private val delegate: Yuru by lazy { YuruImpl(RealYuruBackend()) }
+		private val delegate: Yuru by lazy { BaseYuruImpl(RealYuruBackend()) }
 
-		override fun getOrCreateSinglePermissionController(permissionName: String): YuruPermissionController {
-			return delegate.getOrCreateSinglePermissionController(permissionName)
+		override fun singlePermissionController(permission: String): YuruPermissionController {
+			return delegate.singlePermissionController(permission)
 		}
 
-		override fun getOrCreateMultiplePermissionController(
-			permissionName0: String,
-			permissionName1: String,
-			vararg permissionName: String,
+		override fun multiplePermissionController(
+			first: String,
+			second: String,
+			vararg remaining: String,
 		): YuruMultiplePermissionController {
-			return delegate.getOrCreateMultiplePermissionController(permissionName0, permissionName1, *permissionName)
+			return delegate.multiplePermissionController(first, second, *remaining)
 		}
 
-		override fun getOrCreateMultiplePermissionController(permissionNames: List<String>): YuruMultiplePermissionController {
-			return delegate.getOrCreateMultiplePermissionController(permissionNames)
+		override fun multiplePermissionController(permissions: List<String>): YuruMultiplePermissionController {
+			return delegate.multiplePermissionController(permissions)
 		}
 
 		/**
@@ -73,7 +73,7 @@ public interface Yuru {
 /**
  * Internal base implementation for [Yuru].
  */
-public open class YuruImpl internal constructor(
+public open class BaseYuruImpl internal constructor(
 	internal val backend: YuruBackend,
 ) : Yuru {
 	private val _scope by lazy { CoroutineScope(Dispatchers.Main.immediate + SupervisorJob()) }
@@ -103,37 +103,37 @@ public open class YuruImpl internal constructor(
 		)
 	}
 
-	override fun getOrCreateSinglePermissionController(permissionName: String): YuruPermissionController {
-		backend.validatePermission(permissionName)
+	override fun singlePermissionController(permission: String): YuruPermissionController {
+		backend.validatePermission(permission)
 
-		return _singlePermissionControllers.getOrPut(permissionName) {
-			backend.createSingleController(permissionName)
+		return _singlePermissionControllers.getOrPut(permission) {
+			backend.createSingleController(permission)
 		}
 	}
 
-	override fun getOrCreateMultiplePermissionController(
-		permissionName0: String,
-		permissionName1: String,
-		vararg permissionName: String,
+	override fun multiplePermissionController(
+		first: String,
+		second: String,
+		vararg remaining: String,
 	): YuruMultiplePermissionController {
 		val permissionsList = buildList {
-			add(permissionName0)
-			add(permissionName1)
-			addAll(permissionName)
+			add(first)
+			add(second)
+			addAll(remaining)
 		}
 
-		return getOrCreateMultiplePermissionController(permissionsList)
+		return multiplePermissionController(permissionsList)
 	}
 
-	override fun getOrCreateMultiplePermissionController(
-		permissionNames: List<String>,
+	override fun multiplePermissionController(
+		permissions: List<String>,
 	): YuruMultiplePermissionController {
-		require(permissionNames.isNotEmpty()) {
+		require(permissions.isNotEmpty()) {
 			"At least 2 permission names must be provided"
 		}
 
 		// Normalize the permission list to ensure consistency in the map keys
-		val sanitizedPermissionNames = permissionNames.distinct().sorted()
+		val sanitizedPermissionNames = permissions.distinct().sorted()
 
 		sanitizedPermissionNames.forEach { backend.validatePermission(it) }
 
