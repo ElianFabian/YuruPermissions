@@ -85,7 +85,6 @@ internal class RealYuruBackend : YuruBackend {
 			ProcessLifecycleOwner.get().lifecycle.addObserver(observer)
 
 			ActivityProvider.activity.collect { activity ->
-				println("$$$ activity: $activity")
 				singleControllers.forEach { (_, controller) ->
 					refreshLauncher(activity, controller)
 				}

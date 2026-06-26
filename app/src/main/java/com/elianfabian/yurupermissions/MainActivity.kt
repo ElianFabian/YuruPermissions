@@ -11,9 +11,13 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -50,7 +54,7 @@ class MainActivity : ComponentActivity() {
 				val uiState by viewModel.uiState.collectAsState()
 
 				Scaffold(
-					modifier = Modifier.fillMaxSize(),
+					modifier = Modifier.fillMaxSize().padding(WindowInsets.navigationBars.asPaddingValues()),
 					bottomBar = {
 						// Global button to open system app settings
 						Button(

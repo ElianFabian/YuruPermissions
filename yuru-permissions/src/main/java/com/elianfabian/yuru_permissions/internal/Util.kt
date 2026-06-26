@@ -89,7 +89,7 @@ internal fun checkManifestPermission(permissionName: String) {
 
 			if (isDebuggable) {
 				// 🔴 Crash immediately during development so the developer notices it instantly
-				throw IllegalStateException("YuruPermissions Error: $errorMessage")
+				throw IllegalArgumentException("YuruPermissions Error: $errorMessage")
 			}
 			else {
 				// ⚠️ Just log it in production to prevent crashing an end-user's device due to OS glitches

@@ -159,11 +159,6 @@ class MainViewModel : ViewModel() {
 	 * Generic handler for multiple permission requests.
 	 */
 	private fun handleMultipleRequest(controller: YuruMultiplePermissionController, name: String) {
-
-		viewModelScope.launch {
-			controller.request()
-		}
-		return
 		val isPermanentlyDenied = controller.state.value.values.any { it == YuruPermissionState.PermanentlyDenied }
 		if (isPermanentlyDenied) {
 			_pendingSettingsPermissionName.value = name
