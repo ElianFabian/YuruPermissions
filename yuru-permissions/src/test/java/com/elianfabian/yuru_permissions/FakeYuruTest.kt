@@ -182,4 +182,27 @@ class FakeYuruTest {
 
 		assertEquals(YuruPermissionState.Granted, result)
 	}
+
+	@Test
+	fun `test concurrent requests for same permission should both resolve`() = runTest(testDispatcher) {
+		val mockYuru = Yuru.createSimulatedYuruEnvironment()
+		val camera = mockYuru.singlePermissionController(Manifest.permission.CAMERA)
+
+		var result1: YuruPermissionState? = null
+		var result2: YuruPermissionState? = null
+
+		launch { result1 = camera.request() }
+		launch { result2 = camera.request() }
+
+		camera.accept()
+
+		assertEquals(YuruPermissionState.Granted, result1)
+		assertEquals(YuruPermissionState.Granted, result2)
+	}
+
+	@Test(expected = IllegalArgumentException::class)
+	fun `test multiple permission controller with only one permission should fail`() {
+		val mockYuru = Yuru.createSimulatedYuruEnvironment()
+		mockYuru.multiplePermissionController(listOf("p1"))
+	}
 }

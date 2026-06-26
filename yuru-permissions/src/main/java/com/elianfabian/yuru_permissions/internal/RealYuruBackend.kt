@@ -11,7 +11,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.UUID
+import java.util.WeakHashMap
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * Production implementation of [YuruBackend] that interacts with the Android system.
@@ -21,10 +23,12 @@ internal class RealYuruBackend : YuruBackend {
 	private val _singleLaunchers = mutableMapOf<String, ActivityResultLauncherHolder<String>>()
 	private val _multipleLaunchers = mutableMapOf<List<String>, ActivityResultLauncherHolder<Array<String>>>()
 
-	private val _keyByController = mutableMapOf<Any, String>()
+	private val _keyByController = WeakHashMap<Any, String>()
 
 	private val _singleContinuations = mutableMapOf<String, CancellableContinuation<YuruPermissionState>>()
 	private val _multipleContinuations = mutableMapOf<List<String>, CancellableContinuation<Map<String, YuruPermissionState>>>()
+
+	private val _keyedMutex = KeyedMutex<Any>()
 
 	override fun getPermissionState(permissionName: String): YuruPermissionState {
 		return getPermissionState(
@@ -44,22 +48,52 @@ internal class RealYuruBackend : YuruBackend {
 	}
 
 	override suspend fun requestPermission(permissionName: String): YuruPermissionState {
-		val holder = _singleLaunchers[permissionName] ?: error("Launcher not initialized for $permissionName")
+		return _keyedMutex.withLock(permissionName) {
+			val currentState = getPermissionState(permissionName)
+			if (currentState == YuruPermissionState.Granted) {
+				return@withLock YuruPermissionState.Granted
+			}
 
-		return suspendCancellableCoroutine { continuation ->
-			_singleContinuations[permissionName] = continuation
-			continuation.invokeOnCancellation { _singleContinuations.remove(permissionName) }
-			holder.launch(permissionName)
+			val holder = _singleLaunchers[permissionName] ?: error("Launcher not initialized for $permissionName")
+
+			suspendCancellableCoroutine { continuation ->
+				_singleContinuations[permissionName] = continuation
+
+				continuation.invokeOnCancellation {
+					_singleContinuations.remove(permissionName)
+				}
+
+				try {
+					holder.launch(permissionName)
+				} catch (e: Exception) {
+					_singleContinuations.remove(permissionName)?.resumeWithException(e)
+				}
+			}
 		}
 	}
 
 	override suspend fun requestMultiplePermissions(permissionNames: List<String>): Map<String, YuruPermissionState> {
-		val holder = _multipleLaunchers[permissionNames] ?: error("Launcher not initialized for $permissionNames")
+		return _keyedMutex.withLock(permissionNames) {
+			val currentState = getMultiplePermissionState(permissionNames)
+			if (currentState.values.all { it == YuruPermissionState.Granted }) {
+				return@withLock currentState
+			}
 
-		return suspendCancellableCoroutine { continuation ->
-			_multipleContinuations[permissionNames] = continuation
-			continuation.invokeOnCancellation { _multipleContinuations.remove(permissionNames) }
-			holder.launch(permissionNames.toTypedArray())
+			val holder = _multipleLaunchers[permissionNames] ?: error("Launcher not initialized for $permissionNames")
+
+			suspendCancellableCoroutine { continuation ->
+				_multipleContinuations[permissionNames] = continuation
+
+				continuation.invokeOnCancellation {
+					_multipleContinuations.remove(permissionNames)
+				}
+
+				try {
+					holder.launch(permissionNames.toTypedArray())
+				} catch (e: Exception) {
+					_multipleContinuations.remove(permissionNames)?.resumeWithException(e)
+				}
+			}
 		}
 	}
 
@@ -85,10 +119,14 @@ internal class RealYuruBackend : YuruBackend {
 			ProcessLifecycleOwner.get().lifecycle.addObserver(observer)
 
 			ActivityProvider.activity.collect { activity ->
-				singleControllers.forEach { (_, controller) ->
+				// Create snapshots to avoid ConcurrentModificationException if new controllers are added during iteration
+				val singles = singleControllers.values.toList()
+				val multiples = multipleControllers.values.toList()
+
+				singles.forEach { controller ->
 					refreshLauncher(activity, controller)
 				}
-				multipleControllers.forEach { (_, controller) ->
+				multiples.forEach { controller ->
 					refreshLauncher(activity, controller)
 				}
 			}
@@ -105,9 +143,7 @@ internal class RealYuruBackend : YuruBackend {
 
 	private fun refreshLauncher(activity: ComponentActivity?, controller: YuruPermissionControllerImpl) {
 		val holder = _singleLaunchers.getOrPut(controller.permissionName) { ActivityResultLauncherHolder() }
-		holder.launcher?.also { launcher ->
-			launcher.unregister()
-		}
+		holder.unregister()
 
 		if (activity == null) {
 			return
@@ -126,9 +162,7 @@ internal class RealYuruBackend : YuruBackend {
 
 	private fun refreshLauncher(activity: ComponentActivity?, controller: YuruMultiplePermissionControllerImpl) {
 		val holder = _multipleLaunchers.getOrPut(controller.permissionNames) { ActivityResultLauncherHolder() }
-		holder.launcher?.also { launcher ->
-			launcher.unregister()
-		}
+		holder.unregister()
 
 		if (activity == null) {
 			return

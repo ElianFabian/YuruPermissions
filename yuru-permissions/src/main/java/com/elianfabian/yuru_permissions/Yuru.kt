@@ -128,7 +128,7 @@ public open class BaseYuruImpl internal constructor(
 	override fun multiplePermissionController(
 		permissions: List<String>,
 	): YuruMultiplePermissionController {
-		require(permissions.isNotEmpty()) {
+		require(permissions.size >= 2) {
 			"At least 2 permission names must be provided"
 		}
 

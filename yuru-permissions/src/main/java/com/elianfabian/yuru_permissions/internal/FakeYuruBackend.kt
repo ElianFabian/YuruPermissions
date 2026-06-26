@@ -17,6 +17,8 @@ internal class FakeYuruBackend : YuruBackend {
 	private val singleControllers = mutableMapOf<String, FakeYuruPermissionControllerImpl>()
 	private val multipleControllers = mutableMapOf<List<String>, FakeYuruMultiplePermissionControllerImpl>()
 
+	private val keyedMutex = KeyedMutex<Any>()
+
 	// Result queues for "pre-emptive" actions (e.g. calling accept() before request())
 	private val singleResultQueue = mutableMapOf<String, YuruPermissionState>()
 	private val multipleResultQueue = mutableMapOf<List<String>, Map<String, YuruPermissionState>>()
@@ -26,6 +28,8 @@ internal class FakeYuruBackend : YuruBackend {
 		rejectionCount.clear()
 		singleResultQueue.clear()
 		multipleResultQueue.clear()
+		singleContinuations.clear()
+		multipleContinuations.clear()
 		singleControllers.values.forEach { it.updateInternalState(YuruPermissionState.NotDetermined) }
 		multipleControllers.values.forEach { controller ->
 			controller.updateInternalState(controller.permissionNames.associateWith { YuruPermissionState.NotDetermined })
@@ -41,28 +45,46 @@ internal class FakeYuruBackend : YuruBackend {
 	}
 
 	override suspend fun requestPermission(permissionName: String): YuruPermissionState {
-		// If a result is already queued, return it immediately
-		singleResultQueue.remove(permissionName)?.let {
-			processAndApplySingle(permissionName, it)
-			return states[permissionName]!!
-		}
+		return keyedMutex.withLock(permissionName) {
+			// If already granted, return immediately
+			if (getPermissionState(permissionName) == YuruPermissionState.Granted) {
+				return@withLock YuruPermissionState.Granted
+			}
 
-		return suspendCancellableCoroutine { continuation ->
-			singleContinuations[permissionName] = continuation
-			continuation.invokeOnCancellation { singleContinuations.remove(permissionName) }
+			// If a result is already queued, return it immediately
+			singleResultQueue.remove(permissionName)?.let {
+				processAndApplySingle(permissionName, it)
+				return@withLock states[permissionName]!!
+			}
+
+			suspendCancellableCoroutine { continuation ->
+				singleContinuations[permissionName] = continuation
+				continuation.invokeOnCancellation {
+					singleContinuations.remove(permissionName)
+				}
+			}
 		}
 	}
 
 	override suspend fun requestMultiplePermissions(permissionNames: List<String>): Map<String, YuruPermissionState> {
-		// If a result is already queued, return it immediately
-		multipleResultQueue.remove(permissionNames)?.let {
-			processAndApplyMultiple(it)
-			return permissionNames.associateWith { getPermissionState(it) }
-		}
+		return keyedMutex.withLock(permissionNames) {
+			// If already granted, return immediately
+			if (getMultiplePermissionState(permissionNames).values.all { it == YuruPermissionState.Granted }) {
+				return@withLock getMultiplePermissionState(permissionNames)
+			}
 
-		return suspendCancellableCoroutine { continuation ->
-			multipleContinuations[permissionNames] = continuation
-			continuation.invokeOnCancellation { multipleContinuations.remove(permissionNames) }
+			// If a result is already queued, return it immediately
+			multipleResultQueue.remove(permissionNames)?.let {
+				processAndApplyMultiple(it)
+				return@withLock permissionNames.associateWith { getPermissionState(it) }
+			}
+
+			suspendCancellableCoroutine { continuation ->
+				multipleContinuations[permissionNames] = continuation
+				continuation.invokeOnCancellation {
+					multipleContinuations.remove(permissionNames)
+				}
+			}
 		}
 	}
 
@@ -104,7 +126,8 @@ internal class FakeYuruBackend : YuruBackend {
 		val continuation = multipleContinuations.remove(permissionNames)
 		if (continuation != null) {
 			processAndApplyMultiple(newStates)
-			continuation.resume(permissionNames.associateWith { getPermissionState(it) })
+			val finalStates = permissionNames.associateWith { getPermissionState(it) }
+			continuation.resume(finalStates)
 		}
 		else {
 			// Queue the result if no request is active

@@ -7,10 +7,11 @@ internal class ActivityResultLauncherHolder<I> {
 	var launcher: ActivityResultLauncher<I>? = null
 
 	fun launch(input: I) {
-		launcher?.launch(input) ?: error("Launcher has not been initialized")
+		launcher?.launch(input) ?: error("No active Activity available to request permission")
 	}
 
 	fun unregister() {
-		launcher?.unregister() ?: error("Launcher has not been initialized")
+		launcher?.unregister()
+		launcher = null
 	}
 }
