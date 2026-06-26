@@ -1,6 +1,11 @@
 [versions]
+
+# Project Metadata
+yuruProviderVersion = "1.0.0"
+yuruProviderGroup = "com.github.ElianFabian.YuruPermissions"
+
 agp = "9.2.1"
-coreKtx = "1.13.0"
+coreKtx = "1.17.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
@@ -14,7 +19,7 @@ kotlinxCoroutinesTest = "1.8.1"
 orchestrator = "1.6.1"
 uiautomator = "2.3.0"
 lifecycleProcess = "2.9.2"
-activityKtx = "1.10.0"
+activityKtx = "1.11.0"
 
 activityProvider = "1.0.0"
 
