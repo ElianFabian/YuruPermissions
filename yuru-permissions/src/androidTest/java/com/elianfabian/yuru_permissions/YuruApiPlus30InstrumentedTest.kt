@@ -28,7 +28,7 @@ class YuruApiPlus30InstrumentedTest {
 
 	@Test
 	fun testCameraPermissionTwoStrikesPermanentDenial() = runTest(timeout = 15.seconds) {
-		val yuru = Yuru()
+		val yuru = Yuru
 		val controller = yuru.getOrCreateSinglePermissionController(Manifest.permission.CAMERA)
 
 		// On API 30+, denying twice in a row results in Permanent Denial.
@@ -54,7 +54,7 @@ class YuruApiPlus30InstrumentedTest {
 
 	@Test
 	fun testMultiplePermissionsTwoStrikes() = runTest(timeout = 15.seconds) {
-		val yuru = Yuru()
+		val yuru = Yuru
 		// Using CAMERA and READ_CONTACTS which are both in debug manifest
 		val controller = yuru.getOrCreateMultiplePermissionController(
 			Manifest.permission.CAMERA,

@@ -20,7 +20,7 @@ class YuruApiPre23InstrumentedTest {
 
 	@Test
 	fun testCameraPermissionGrantedOnPre23() = runTest(timeout = 5.seconds) {
-		val yuru = Yuru()
+		val yuru = Yuru
 		val controller = yuru.getOrCreateSinglePermissionController(Manifest.permission.CAMERA)
 
 		// On API < 23, permissions are granted at install time if in manifest.
@@ -33,7 +33,7 @@ class YuruApiPre23InstrumentedTest {
 
 	@Test
 	fun testPermissionMissingInManifestOnPre23() = runTest(timeout = 5.seconds) {
-		val yuru = Yuru()
+		val yuru = Yuru
 		// READ_SMS is not in TestActivity's manifest
 
 		try {

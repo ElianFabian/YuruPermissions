@@ -14,14 +14,69 @@ import kotlinx.coroutines.SupervisorJob
 /**
  * Main entry point for the Yuru Permissions library.
  *
- * This class provides a centralized way to manage and request permissions. It maintains
- * a registry of [YuruPermissionController] and [YuruMultiplePermissionController] instances
- * to ensure that each permission set has a single source of truth for its state.
+ * This interface provides a centralized way to manage and request permissions.
  */
-public open class Yuru internal constructor(
+public interface Yuru {
+	/**
+	 * Gets an existing [YuruPermissionController] for the given [permissionName],
+	 * or creates a new one if it doesn't exist.
+	 */
+	public fun getOrCreateSinglePermissionController(permissionName: String): YuruPermissionController
+
+	/**
+	 * Convenience method to get or create a controller for multiple permissions.
+	 * Requires at least 2 permission names.
+	 */
+	public fun getOrCreateMultiplePermissionController(
+		permissionName0: String,
+		permissionName1: String,
+		vararg permissionName: String,
+	): YuruMultiplePermissionController
+
+	/**
+	 * Gets an existing [YuruMultiplePermissionController] for the given [permissionNames],
+	 * or creates a new one if it doesn't exist.
+	 */
+	public fun getOrCreateMultiplePermissionController(
+		permissionNames: List<String>,
+	): YuruMultiplePermissionController
+
+	public companion object : Yuru {
+		private val delegate: Yuru by lazy { YuruImpl(RealYuruBackend()) }
+
+		override fun getOrCreateSinglePermissionController(permissionName: String): YuruPermissionController {
+			return delegate.getOrCreateSinglePermissionController(permissionName)
+		}
+
+		override fun getOrCreateMultiplePermissionController(
+			permissionName0: String,
+			permissionName1: String,
+			vararg permissionName: String,
+		): YuruMultiplePermissionController {
+			return delegate.getOrCreateMultiplePermissionController(permissionName0, permissionName1, *permissionName)
+		}
+
+		override fun getOrCreateMultiplePermissionController(permissionNames: List<String>): YuruMultiplePermissionController {
+			return delegate.getOrCreateMultiplePermissionController(permissionNames)
+		}
+
+		/**
+		 * Creates a [FakeYuru] environment for testing.
+		 */
+		public fun createSimulatedYuruEnvironment(): FakeYuru {
+			return FakeYuru()
+		}
+	}
+}
+
+
+/**
+ * Internal base implementation for [Yuru].
+ */
+public open class YuruImpl internal constructor(
 	internal val backend: YuruBackend,
-) {
-	private val _scope = CoroutineScope(Dispatchers.Main.immediate)
+) : Yuru {
+	private val _scope by lazy { CoroutineScope(Dispatchers.Main.immediate + SupervisorJob()) }
 
 	private val _singlePermissionControllers = mutableMapOf<String, YuruPermissionControllerImpl>()
 	private val _multiplePermissionControllers = mutableMapOf<List<String>, YuruMultiplePermissionControllerImpl>()
@@ -38,11 +93,6 @@ public open class Yuru internal constructor(
 		}
 	}
 
-	/**
-	 * Creates a new Yuru instance using the production [RealYuruBackend].
-	 */
-	public constructor() : this(RealYuruBackend())
-
 	init {
 		// Initialize the backend with the necessary lifecycle and scope information
 		backend.onYuruInitialized(
@@ -53,11 +103,7 @@ public open class Yuru internal constructor(
 		)
 	}
 
-	/**
-	 * Gets an existing [YuruPermissionController] for the given [permissionName],
-	 * or creates a new one if it doesn't exist.
-	 */
-	public open fun getOrCreateSinglePermissionController(permissionName: String): YuruPermissionController {
+	override fun getOrCreateSinglePermissionController(permissionName: String): YuruPermissionController {
 		backend.validatePermission(permissionName)
 
 		return _singlePermissionControllers.getOrPut(permissionName) {
@@ -65,11 +111,7 @@ public open class Yuru internal constructor(
 		}
 	}
 
-	/**
-	 * Convenience method to get or create a controller for multiple permissions.
-	 * Requires at least 2 permission names.
-	 */
-	public fun getOrCreateMultiplePermissionController(
+	override fun getOrCreateMultiplePermissionController(
 		permissionName0: String,
 		permissionName1: String,
 		vararg permissionName: String,
@@ -83,11 +125,7 @@ public open class Yuru internal constructor(
 		return getOrCreateMultiplePermissionController(permissionsList)
 	}
 
-	/**
-	 * Gets an existing [YuruMultiplePermissionController] for the given [permissionNames],
-	 * or creates a new one if it doesn't exist.
-	 */
-	public open fun getOrCreateMultiplePermissionController(
+	override fun getOrCreateMultiplePermissionController(
 		permissionNames: List<String>,
 	): YuruMultiplePermissionController {
 		require(permissionNames.isNotEmpty()) {
@@ -101,15 +139,6 @@ public open class Yuru internal constructor(
 
 		return _multiplePermissionControllers.getOrPut(sanitizedPermissionNames) {
 			backend.createMultipleController(sanitizedPermissionNames)
-		}
-	}
-
-	public companion object {
-		/**
-		 * Creates a [FakeYuru] environment for testing.
-		 */
-		public fun createSimulatedYuruEnvironment(): FakeYuru {
-			return FakeYuru()
 		}
 	}
 }

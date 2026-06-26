@@ -1,17 +1,11 @@
 package com.elianfabian.yuru_permissions.testing
 
-import androidx.lifecycle.DefaultLifecycleObserver
 import com.elianfabian.yuru_permissions.Yuru
+import com.elianfabian.yuru_permissions.YuruImpl
 import com.elianfabian.yuru_permissions.YuruMultiplePermissionController
 import com.elianfabian.yuru_permissions.YuruPermissionController
 import com.elianfabian.yuru_permissions.YuruPermissionState
 import com.elianfabian.yuru_permissions.internal.FakeYuruBackend
-import com.elianfabian.yuru_permissions.internal.FakeYuruMultiplePermissionControllerImpl
-import com.elianfabian.yuru_permissions.internal.FakeYuruPermissionControllerImpl
-import kotlinx.coroutines.CancellableContinuation
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
 
 /**
  * A simulated [Yuru] environment for testing.
@@ -22,7 +16,7 @@ import kotlin.coroutines.resume
  */
 public class FakeYuru internal constructor(
 	private val fakeBackend: FakeYuruBackend = FakeYuruBackend(),
-) : Yuru(fakeBackend) {
+) : YuruImpl(fakeBackend) {
 
 	/**
 	 * Resets all simulated permissions to [YuruPermissionState.NotDetermined].

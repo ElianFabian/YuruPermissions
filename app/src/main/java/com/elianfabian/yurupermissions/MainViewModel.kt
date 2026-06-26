@@ -43,26 +43,25 @@ sealed interface MainUiAction {
 }
 
 class MainViewModel : ViewModel() {
-	private val yuru = Yuru()
 
 	// Controllers for single permissions
-	private val cameraController = yuru.getOrCreateSinglePermissionController(Manifest.permission.CAMERA)
-	private val contactsController = yuru.getOrCreateSinglePermissionController(Manifest.permission.READ_CONTACTS)
+	private val cameraController = Yuru.getOrCreateSinglePermissionController(Manifest.permission.CAMERA)
+	private val contactsController = Yuru.getOrCreateSinglePermissionController(Manifest.permission.READ_CONTACTS)
 
 	// Notification permission only exists on API 33+
 	private val notificationsController = if (Build.VERSION.SDK_INT >= 33) {
-		yuru.getOrCreateSinglePermissionController(Manifest.permission.POST_NOTIFICATIONS)
+		Yuru.getOrCreateSinglePermissionController(Manifest.permission.POST_NOTIFICATIONS)
 	}
 	else null
 
 	// Controllers for groups of permissions
-	private val locationController = yuru.getOrCreateMultiplePermissionController(
+	private val locationController = Yuru.getOrCreateMultiplePermissionController(
 		Manifest.permission.ACCESS_FINE_LOCATION,
 		Manifest.permission.ACCESS_COARSE_LOCATION
 	)
 
 	// Bluetooth permissions changed significantly in API 31
-	private val bluetoothController = yuru.getOrCreateMultiplePermissionController(
+	private val bluetoothController = Yuru.getOrCreateMultiplePermissionController(
 		buildList {
 			if (Build.VERSION.SDK_INT >= 31) {
 				add(Manifest.permission.BLUETOOTH_SCAN)
@@ -76,7 +75,7 @@ class MainViewModel : ViewModel() {
 	)
 
 	// Storage permissions changed to Media permissions in API 33
-	private val storageController = yuru.getOrCreateMultiplePermissionController(
+	private val storageController = Yuru.getOrCreateMultiplePermissionController(
 		buildList {
 			if (Build.VERSION.SDK_INT >= 33) {
 				add(Manifest.permission.READ_MEDIA_IMAGES)

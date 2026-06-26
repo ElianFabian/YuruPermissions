@@ -43,7 +43,7 @@ class YuruApiPlus23InstrumentedTest {
 
 	@Test
 	fun testCameraPermissionGrant() = runTest(timeout = 5.seconds) {
-		val yuru = Yuru()
+		val yuru = Yuru
 		val controller = yuru.getOrCreateSinglePermissionController(Manifest.permission.CAMERA)
 
 		// 1. Initial State should be NotDetermined (assuming fresh installation)
@@ -70,7 +70,7 @@ class YuruApiPlus23InstrumentedTest {
 
 	@Test
 	fun testCameraPermissionDeny() = runTest(timeout = 5.seconds) {
-		val yuru = Yuru()
+		val yuru = Yuru
 		val controller = yuru.getOrCreateSinglePermissionController(Manifest.permission.CAMERA)
 
 		assertEquals(controller.state.value, YuruPermissionState.NotDetermined)
@@ -95,14 +95,14 @@ class YuruApiPlus23InstrumentedTest {
 
 	@Test(expected = IllegalArgumentException::class)
 	fun testWrongPermissionString() {
-		val yuru = Yuru()
+		val yuru = Yuru
 		// This should throw IllegalArgumentException immediately
 		yuru.getOrCreateSinglePermissionController("INVALID_PERMISSION_NAME")
 	}
 
 	@Test
 	fun testPermissionMissingInManifest() = runTest(timeout = 5.seconds) {
-		val yuru = Yuru()
+		val yuru = Yuru
 		// READ_SMS is not in TestActivity's manifest
 		val controller = yuru.getOrCreateSinglePermissionController(Manifest.permission.READ_SMS)
 
@@ -116,7 +116,7 @@ class YuruApiPlus23InstrumentedTest {
 
 	@Test
 	fun testMultiplePermissionsGrant() = runTest(timeout = 5.seconds) {
-		val yuru = Yuru()
+		val yuru = Yuru
 		// Only CAMERA is in manifest for TestActivity. 
 		// To test multiple, we'd need them in the manifest.
 		// For now, let's use a subset or add them to debug manifest.
@@ -147,7 +147,7 @@ class YuruApiPlus23InstrumentedTest {
 
 	@Test
 	fun testCameraPermissionPermanentlyDeniedWithCheckbox() = runTest(timeout = 10.seconds) {
-		val yuru = Yuru()
+		val yuru = Yuru
 		val controller = yuru.getOrCreateSinglePermissionController(Manifest.permission.CAMERA)
 
 		// 1. First request and deny
