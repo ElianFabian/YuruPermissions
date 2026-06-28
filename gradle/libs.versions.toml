@@ -1,7 +1,7 @@
 [versions]
 
 # Project Metadata
-yuruProviderVersion = "2.0.0"
+yuruProviderVersion = "2.0.1"
 yuruProviderGroup = "com.github.ElianFabian.YuruPermissions"
 
 agp = "9.2.1"
