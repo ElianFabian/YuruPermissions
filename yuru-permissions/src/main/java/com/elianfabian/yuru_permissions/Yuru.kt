@@ -41,24 +41,11 @@ public interface Yuru {
 		permissions: List<String>,
 	): YuruMultiplePermissionController
 
-	public companion object : Yuru {
-		private val delegate: Yuru by lazy { BaseYuruImpl(RealYuruBackend()) }
+	public companion object {
 
-		override fun singlePermissionController(permission: String): YuruPermissionController {
-			return delegate.singlePermissionController(permission)
-		}
+		private val _instance by lazy { BaseYuruImpl(RealYuruBackend()) }
 
-		override fun multiplePermissionController(
-			first: String,
-			second: String,
-			vararg remaining: String,
-		): YuruMultiplePermissionController {
-			return delegate.multiplePermissionController(first, second, *remaining)
-		}
-
-		override fun multiplePermissionController(permissions: List<String>): YuruMultiplePermissionController {
-			return delegate.multiplePermissionController(permissions)
-		}
+		public fun getInstance(): Yuru = _instance
 
 		/**
 		 * Creates a [FakeYuru] environment for testing.
