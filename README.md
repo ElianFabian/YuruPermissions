@@ -44,11 +44,14 @@ You can define controllers for single or multiple permissions. These are usually
 
 ```kotlin
 class MyViewModel : ViewModel() {
+	
+	private val yuru = Yuru.getInstance()
+	
     // Single permission
-    private val cameraController = Yuru.singlePermissionController(Manifest.permission.CAMERA)
+    private val cameraController = yuru.singlePermissionController(Manifest.permission.CAMERA)
 
     // Multiple permissions
-    private val locationController = Yuru.multiplePermissionController(
+    private val locationController = yuru.multiplePermissionController(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION,
     )
