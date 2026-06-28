@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -36,7 +35,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.elianfabian.yuru_permissions.YuruPermissionState
 import com.elianfabian.yuru_permissions.allAreGranted
-import com.elianfabian.yuru_permissions.allArePermanentlyDenied
 import com.elianfabian.yurupermissions.ui.theme.YuruPermissionsTheme
 
 /**
@@ -54,7 +52,9 @@ class MainActivity : ComponentActivity() {
 				val uiState by viewModel.uiState.collectAsState()
 
 				Scaffold(
-					modifier = Modifier.fillMaxSize().padding(WindowInsets.navigationBars.asPaddingValues()),
+					modifier = Modifier
+						.fillMaxSize()
+						.padding(WindowInsets.navigationBars.asPaddingValues()),
 					bottomBar = {
 						// Global button to open system app settings
 						Button(
