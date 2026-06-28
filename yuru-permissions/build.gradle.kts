@@ -12,6 +12,17 @@ android {
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
 		testInstrumentationRunnerArguments["clearPackageData"] = "true"
+
+		consumerProguardFiles("consumer-rules.keep")
+	}
+	buildTypes {
+		debug {
+			isMinifyEnabled = true
+			proguardFiles(
+				getDefaultProguardFile("proguard-android-optimize.txt"),
+				"src/main/keepRules/rules.keep"
+			)
+		}
 	}
 	testOptions {
 		execution = "ANDROIDX_TEST_ORCHESTRATOR"
@@ -26,6 +37,7 @@ android {
 }
 
 dependencies {
+	implementation(libs.activityResultBridge)
 	implementation(libs.activityProvider)
 	implementation(libs.androidx.lifecycleProcess)
 	implementation(libs.androidx.activity.ktx)

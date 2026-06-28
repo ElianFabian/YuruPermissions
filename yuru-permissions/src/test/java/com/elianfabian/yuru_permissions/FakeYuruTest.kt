@@ -140,10 +140,12 @@ class FakeYuruTest {
 		launch { results = controller.request() }
 
 		// Manually update states for mixed results
-		controller.updateStates(mapOf(
-			"p1" to YuruPermissionState.Granted,
-			"p2" to YuruPermissionState.Denied
-		))
+		controller.updateStates(
+			mapOf(
+				"p1" to YuruPermissionState.Granted,
+				"p2" to YuruPermissionState.Denied
+			)
+		)
 
 		val finalState = controller.state.value
 		assertEquals(YuruPermissionState.Granted, finalState["p1"])

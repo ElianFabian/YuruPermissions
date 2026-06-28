@@ -1,0 +1,4 @@
+-keep class com.elianfabian.yuru_permissions.Yuru { *; }
+-keep class com.elianfabian.yuru_permissions.Yuru$Companion { *; }
+-keep class com.elianfabian.yuru_permissions.YuruPermissionController { *; }
+-keep class com.elianfabian.yuru_permissions.YuruMultiplePermissionController { *; }

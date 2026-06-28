@@ -10,3 +10,8 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-keep class com.elianfabian.yuru_permissions.Yuru { *; }
+-keep class com.elianfabian.yuru_permissions.Yuru$Companion { *; }
+-keep class com.elianfabian.yuru_permissions.YuruPermissionController { *; }
+-keep class com.elianfabian.yuru_permissions.YuruMultiplePermissionController { *; }
