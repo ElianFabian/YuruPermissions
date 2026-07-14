@@ -14,7 +14,7 @@ allowing you to control permissions from anywhere—especially your **ViewModels
   `Fragment`. Request and observe permissions directly from your `ViewModel` or wherever you want.
 * **💎 Reliable Permission States:** Android's native API is ambiguous about whether a permission
   is "Permanently Denied." Yuru provides 4 clear, reliable states:
-    * `NotDetermined`: Never asked or status unknown.
+    * `NotDetermined`: Never asked, or automatically revoked some time after the "Only this time" button was pressed.
     * `Granted`: User said yes.
     * `Denied`: User said no, but we can ask again (Show Rationale).
     * `PermanentlyDenied`: User said "Don't ask again" or denied multiple times.
