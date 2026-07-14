@@ -19,7 +19,7 @@ allowing you to control permissions from anywhere—especially your **ViewModels
     * `Denied`: User said no, but we can ask again (Show Rationale).
     * `PermanentlyDenied`: User said "Don't ask again" or denied multiple times.
 * **⚡ Reactive by Design:** Every permission controller exposes a `StateFlow<YuruPermissionState>`,
-  making it easy to drive your UI reactively with Jetpack Compose or View system.
+  making it easy to drive your UI reactively with Jetpack Compose or the View system.
 * **🧪 Built for Testing:** Ships with `FakeYuru`, allowing you to unit test your
   permission-dependent logic without ever touching the Android framework.
 
