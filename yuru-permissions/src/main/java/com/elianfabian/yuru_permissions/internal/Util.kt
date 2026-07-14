@@ -12,12 +12,18 @@ import androidx.core.content.edit
 import com.elianfabian.activity_provider.ActivityProvider
 import com.elianfabian.yuru_permissions.YuruPermissionState
 
+private lateinit var noBackupContext: NoBackupContext
+
+
 @SuppressLint("ObsoleteSdkInt")
 internal fun getPermissionState(
 	activity: Activity,
 	permission: String,
 ): YuruPermissionState {
-	val sharedPrefs = activity.getSharedPreferences("yuru_permissions_prefs", Context.MODE_PRIVATE)
+	if (!::noBackupContext.isInitialized) {
+		noBackupContext = NoBackupContext(activity)
+	}
+	val sharedPrefs = noBackupContext.getSharedPreferences("yuru_permissions_prefs", Context.MODE_PRIVATE)
 
 	return if (ContextCompat.checkSelfPermission(
 			activity,
