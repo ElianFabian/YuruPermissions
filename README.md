@@ -2,8 +2,6 @@
 
 # YuruPermissions
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-
 **YuruPermissions** is a lightweight, reactive, and testing-friendly Android permissions library. It
 solves the biggest headaches of the standard Android Permission API by providing reliable states and
 allowing you to control permissions from anywhere—especially your **ViewModels**.
