@@ -29,7 +29,6 @@ public interface Yuru {
 	 */
 	public fun multiplePermissionController(
 		first: String,
-		second: String,
 		vararg remaining: String,
 	): YuruMultiplePermissionController
 
@@ -100,12 +99,10 @@ public open class BaseYuruImpl internal constructor(
 
 	override fun multiplePermissionController(
 		first: String,
-		second: String,
 		vararg remaining: String,
 	): YuruMultiplePermissionController {
 		val permissionsList = buildList {
 			add(first)
-			add(second)
 			addAll(remaining)
 		}
 
@@ -115,8 +112,8 @@ public open class BaseYuruImpl internal constructor(
 	override fun multiplePermissionController(
 		permissions: List<String>,
 	): YuruMultiplePermissionController {
-		require(permissions.size >= 2) {
-			"At least 2 permission names must be provided"
+		require(permissions.isNotEmpty()) {
+			"Permissions list cannot be empty"
 		}
 
 		// Normalize the permission list to ensure consistency in the map keys
