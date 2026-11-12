@@ -25,6 +25,7 @@ android {
 	}
 	testOptions {
 		execution = "ANDROIDX_TEST_ORCHESTRATOR"
+		unitTests.isIncludeAndroidResources = true
 	}
 	compileOptions {
 		sourceCompatibility = JavaVersion.VERSION_11
@@ -43,6 +44,8 @@ dependencies {
 	implementation(libs.kotlinxCoroutinesAndroid)
 
 	testImplementation(libs.junit)
+	testImplementation(libs.robolectric)
+	testImplementation(libs.androidx.test.core)
 	testImplementation(libs.kotlinxCoroutinesTest)
 	androidTestUtil(libs.androidx.orchestrator)
 	androidTestImplementation(libs.kotlinxCoroutinesTest)

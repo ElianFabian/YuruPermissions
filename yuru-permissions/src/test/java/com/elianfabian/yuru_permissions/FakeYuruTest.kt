@@ -202,9 +202,17 @@ class FakeYuruTest {
 		assertEquals(YuruPermissionState.Granted, result2)
 	}
 
-	@Test(expected = IllegalArgumentException::class)
-	fun `test multiple permission controller with only one permission should fail`() {
+	@Test
+	fun `test multiple permission controller accepts one permission`() = runTest(testDispatcher) {
 		val mockYuru = Yuru.createSimulatedYuruEnvironment()
-		mockYuru.multiplePermissionController(listOf("p1"))
+		val controller = mockYuru.multiplePermissionController(listOf("p1"))
+		controller.acceptAll()
+		assertEquals(mapOf("p1" to YuruPermissionState.Granted), controller.request())
+	}
+
+	@Test(expected = IllegalArgumentException::class)
+	fun `test multiple permission controller rejects empty permissions`() {
+		val mockYuru = Yuru.createSimulatedYuruEnvironment()
+		mockYuru.multiplePermissionController(emptyList())
 	}
 }

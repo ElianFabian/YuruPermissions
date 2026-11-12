@@ -25,7 +25,7 @@ public interface Yuru {
 
 	/**
 	 * Convenience method to get or create a controller for multiple permissions.
-	 * Requires at least 2 permission names.
+	 * Accepts one or more permission names.
 	 */
 	public fun multiplePermissionController(
 		first: String,
@@ -33,7 +33,7 @@ public interface Yuru {
 	): YuruMultiplePermissionController
 
 	/**
-	 * Gets an existing [YuruMultiplePermissionController] for the given [permissions],
+	 * Gets an existing [YuruMultiplePermissionController] for the nonempty [permissions],
 	 * or creates a new one if it doesn't exist.
 	 */
 	public fun multiplePermissionController(
